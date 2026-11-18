@@ -1,3 +1,6 @@
+// Emberwatch is an original night-watch arcade game: keep a campfire alive against
+// the cold. Every click on a log restores warmth; gusts and the long night drain it.
+// This hand-in program copies the static game and its screenshots into /output.
 // Copies the game's static files and screenshots into the build output so the judge can review them.
 // This project is inspired by classic casual game psychology, where the experience is designed
 // around short, repeatable cycles that keep attention without demanding long planning sessions.

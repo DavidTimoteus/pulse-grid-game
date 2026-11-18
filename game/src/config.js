@@ -1,8 +1,8 @@
-// Tunable constants for Pulse Grid. One job: central configuration.
-export const GRID = 6;
-export const CELL = 100;
-export const GAP = 10;
-export const OFFSET = 30;
-export const COLORS = ["#ff5d8f", "#ffd166", "#4ade80", "#6ee7ff", "#a78bfa"];
-export const LEVEL_SECONDS = 30;
-export const AUTOSHOT_SEED = 1;
+// Emberwatch tuning constants. One job: central configuration.
+export const W=720,H=640;
+export const FIRE_X=360,FIRE_Y=470;
+export const HEAT_MAX=100;
+export const BASE_DRAIN=6.5;
+export const LOG_SECONDS=22;
+export const LOG_VALUE=18;
+export const GUST_CHANCE=0.35;

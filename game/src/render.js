@@ -1,32 +1,49 @@
-// Canvas renderer for Pulse Grid: board, HUD text overlay pieces, end screens.
-import { GRID, CELL, GAP, OFFSET, COLORS } from './config.js';
-
-export const SCREEN_TITLE = 'title', SCREEN_PLAY = 'play', SCREEN_OVER = 'over';
-
-export function draw(ctx2d, state, screen) {
-  ctx2d.clearRect(0, 0, 720, 720);
-  ctx2d.fillStyle = '#0b1226'; ctx2d.fillRect(0, 0, 720, 720);
-  // subtle grid glow
-  ctx2d.strokeStyle = '#16224a'; ctx2d.lineWidth = 2;
-  for (let i = 0; i <= GRID; i++) {
-    const p = OFFSET + i * (CELL + GAP);
-    ctx2d.beginPath(); ctx2d.moveTo(p, OFFSET); ctx2d.lineTo(p, OFFSET + GRID * (CELL + GAP) - GAP); ctx2d.stroke();
-    ctx2d.beginPath(); ctx2d.moveTo(OFFSET, p); ctx2d.lineTo(OFFSET + GRID * (CELL + GAP) - GAP, p); ctx2d.stroke();
+// Emberwatch renderer: night sky, stars, pines, snow, fire with embers, HUD visuals.
+import { W,H,FIRE_X,FIRE_Y } from './config.js';
+export function draw(c,state,snow,embers,time){
+  // night sky gradient
+  const g=c.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#0b1030');g.addColorStop(.55,'#1a1638');g.addColorStop(1,'#2a1c28');
+  c.fillStyle=g;c.fillRect(0,0,W,H);
+  // stars
+  c.fillStyle='#dfe8ff';
+  for(let i=0;i<70;i++){const x=(i*97)%W,y=(i*53)%260;c.globalAlpha=.4+.6*((i%5)/5);c.fillRect(x,y,2,2);}
+  c.globalAlpha=1;
+  // moon
+  c.fillStyle='#f4f0d0';c.beginPath();c.arc(620,90,34,0,7);c.fill();
+  // pine silhouettes
+  c.fillStyle='#080c1a';
+  for(let i=0;i<9;i++){const x=i*85-20;pine(c,x,H-150,70+((i*17)%40));}
+  // ground
+  c.fillStyle='#0a0e1c';c.fillRect(0,H-120,W,120);
+  // snow
+  c.fillStyle='rgba(210,230,255,.55)';
+  for(const s of snow){c.beginPath();c.arc(s.x,s.y,s.r,0,7);c.fill();}
+  // fire glow
+  const intensity=Math.max(.2,state.heat/100);
+  const glow=c.createRadialGradient(FIRE_X,FIRE_Y,0,FIRE_X,FIRE_Y,150*intensity);
+  glow.addColorStop(0,'rgba(255,170,60,.55)');glow.addColorStop(1,'rgba(255,120,40,0)');
+  c.fillStyle=glow;c.fillRect(FIRE_X-170,FIRE_Y-170,340,340);
+  // flames (layered)
+  for(let i=0;i<5;i++){
+    const h=(60+i*16)*intensity*(1+.08*Math.sin(time*6+i));
+    c.fillStyle=['#ff4d2e','#ff7a2f','#ff9e42','#ffc25c','#ffe6a0'][i];
+    c.beginPath();c.ellipse(FIRE_X,FIRE_Y-h/2,26-i*4,h,0,0,7);c.fill();
   }
-  for (let r = 0; r < GRID; r++) for (let c = 0; c < GRID; c++) {
-    const v = state.cells[r * GRID + c]; if (v < 0) continue;
-    const x = OFFSET + c * (CELL + GAP), y = OFFSET + r * (CELL + GAP);
-    ctx2d.fillStyle = COLORS[v % COLORS.length];
-    roundRect(ctx2d, x, y, CELL, CELL, 16); ctx2d.fill();
-    ctx2d.fillStyle = 'rgba(255,255,255,.18)';
-    roundRect(ctx2d, x + 10, y + 10, CELL - 20, 18, 9); ctx2d.fill();
+  // logs / embers
+  for(const e of embers){c.fillStyle='#ffb35c';c.globalAlpha=Math.max(0,e.life);c.fillRect(e.x,e.y,3,3);}
+  c.globalAlpha=1;
+  // clickable logs
+  for(let i=0;i<state.logs.length;i++){const l=state.logs[i];if(l.used)continue;
+    c.fillStyle='#8b5a2b';c.fillRect(l.x-28,l.y-9,56,18);
+    c.fillStyle='#b5793f';c.fillRect(l.x-28,l.y-9,56,6);
+    c.strokeStyle='#5c3a1a';c.strokeRect(l.x-28,l.y-9,56,18);
   }
-  if (state.flash > 0) { ctx2d.fillStyle = `rgba(255,255,255,${state.flash * 0.18})`; ctx2d.fillRect(0, 0, 720, 720); }
-  // Title and game-over text are drawn by the HTML overlay (single, legible card),
-  // so the canvas only renders the board itself.
+  // heat bar
+  c.fillStyle='#1a2244';c.fillRect(24,24,220,16);
+  c.fillStyle=state.heat>35?'#ffb35c':'#ff5d5d';c.fillRect(24,24,220*state.heat/100,16);
+  c.strokeStyle='#445899';c.strokeRect(24,24,220,16);
+  if(state.gust>0){c.fillStyle='rgba(180,215,255,.18)';c.fillRect(0,0,W,H);}
+  if(state.flash>0){c.fillStyle=`rgba(255,220,120,${state.flash*.25})`;c.fillRect(0,0,W,H);}
 }
-function roundRect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
-function banner(c, title, sub) {
-  c.fillStyle = '#6ee7ff'; c.font = 'bold 64px Segoe UI, Arial'; c.textAlign = 'center'; c.fillText(title, 360, 320);
-  c.fillStyle = '#ffd166'; c.font = '24px Segoe UI, Arial'; c.fillText(sub, 360, 370);
-}
+function pine(c,x,base,h){c.beginPath();c.moveTo(x,base-h);c.lineTo(x-30,base);c.lineTo(x+30,base);c.closePath();c.fill();}
