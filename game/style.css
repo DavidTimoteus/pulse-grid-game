@@ -1,0 +1,14 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #070b18; color: #eef3ff; font-family: "Segoe UI", Arial, sans-serif; }
+#app { position: relative; width: 720px; height: 760px; margin: 0 auto; overflow: hidden; }
+#board { display: block; width: 720px; height: 720px; background: #0b1226; }
+#hud { display: flex; justify-content: space-between; padding: 8px 18px; font-size: 20px; font-weight: 700; letter-spacing: .5px; }
+#hud span { background: #111a33; padding: 6px 12px; border-radius: 8px; border: 1px solid #22305c; }
+#combo { color: #ffd166; }
+#time { color: #6ee7ff; }
+#overlay { position: absolute; left: 0; top: 0; width: 720px; height: 720px; display: flex; align-items: center; justify-content: center; text-align: center; pointer-events: none; }
+.card { background: rgba(9,14,32,.92); border: 2px solid #4361ee; border-radius: 18px; padding: 34px 44px; box-shadow: 0 0 60px rgba(67,97,238,.35); }
+.card h1 { margin: 0 0 10px; font-size: 58px; letter-spacing: 2px; color: #6ee7ff; }
+.card p { margin: 8px 0; font-size: 20px; color: #c7d3f5; }
+.card .big { font-size: 30px; color: #ffd166; font-weight: 800; }
+.hidden { display: none; }
